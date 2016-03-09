@@ -1,0 +1,12 @@
+{
+    "name": "alanhohn.markdown-toolbar",
+    "title": "Markdown Toolbar",
+    "description": "Provides a toolbar to help write documents in Markdown.",
+    "homepage": "https://github.com/alanhohn/marktool-toolbar",
+    "version": "1.0.0",
+    "author": "Alan Hohn <alanhohn@gmail.com> (http://github.com/alanhohn)",
+    "license": "MIT",
+    "engines": {
+        "brackets": ">=0.24.0"
+    },
+}
