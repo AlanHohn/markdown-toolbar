@@ -1,3 +1,9 @@
+.alanhohn-markdown-bar .btn
+{
+    width: 3em;
+    text-align: center;
+}
+
 .alanhohn-markdown-bar #markdown-heading1
 {
     font-weight: bolder;
@@ -5,11 +11,28 @@
 
 .alanhohn-markdown-bar #markdown-heading2
 {
-    color: dimgray;
     font-weight: bold;
 }
 
 .alanhohn-markdown-bar #markdown-heading3
+{
+    color: darkslategray;
+    font-weight: bold;
+}
+
+.alanhohn-markdown-bar #markdown-heading4
+{
+    color: dimgray;
+    font-weight: bold;
+}
+
+.alanhohn-markdown-bar #markdown-heading5
+{
+    color: darkgray;
+    font-weight: bold;
+}
+
+.alanhohn-markdown-bar #markdown-heading6
 {
     color: darkgray;
 }
@@ -31,7 +54,7 @@
 
 .alanhohn-markdown-bar .spacer
 {
-    width: 2em;
+    width: 1em;
     height: auto;
     display: inline-block;
 }

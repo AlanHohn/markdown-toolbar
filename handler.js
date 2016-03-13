@@ -6,14 +6,35 @@ define(function (require, exports, module) {
 
     var EditorManager   = brackets.getModule("editor/EditorManager");
 
+    /**
+     * Regular expressions do most of the heavy lifting, here
+     * and everywhere.
+     *
+     * Note that the heading items allow for the possibility
+     * that the heading is preceded by a bullet. This seems
+     * odd but it also works, at least in Markdown Preview,
+     * and it is a plausible edge case.
+     *
+     * Numbering in front of a heading just displays a bullet,
+     * so it didn't seem worth preserving.
+     *
+     * Also note that there is a limit on white space before
+     * a heading, as four lines equals raw monospace text.
+     * But there isn't a similar limitation on bullets, because
+     * it would interfere with bullets at level 3+.
+     */
     var MATCH_NONBLANK = /\S/;
     var MATCH_H1 = /^(\s{0,3}|\s*\*\s*)(#\s)/;
     var MATCH_H2 = /^(\s{0,3}|\s*\*\s*)(##\s)/;
     var MATCH_H3 = /^(\s{0,3}|\s*\*\s*)(###\s)/;
+    var MATCH_H4 = /^(\s{0,3}|\s*\*\s*)(####\s)/;
+    var MATCH_H5 = /^(\s{0,3}|\s*\*\s*)(#####\s)/;
+    var MATCH_H6 = /^(\s{0,3}|\s*\*\s*)(######\s)/;
     var MATCH_HD = /^(\s{0,3}|\s*\*\s*)(#+\s)/;
     var MATCH_BULLET = /^\s*\*\s/;
     var MATCH_NUMBERED = /^\s*\d\.\s/;
-    var MATCH_LIST = /^\s*(\*|\d\.)\s/;
+    var MATCH_QUOTE = /^\s*>\s/;
+    var MATCH_LIST = /^\s*(\*|>|\d\.)\s/;
 
     /**
      *  Check initial conditions for any buttons. Make sure
@@ -43,6 +64,11 @@ define(function (require, exports, module) {
      * line in every selection (single or multiple).
      * If the action returns an object, check if it
      * indicates done, in which case return its result.
+     *
+     * Note that in CodeMirror a selection that includes
+     * the final newline is indicated by the selection
+     * ending at column 0 of the following line, so we
+     * have to handle that case.
      */
     function everySelectionLine(editor, fn) {
         var i, selections = editor.getSelections();
@@ -63,9 +89,25 @@ define(function (require, exports, module) {
     }
 
     /**
+     * Perform the provided action on every selection
+     * (single or multiple). If the action returns an
+     * object, check if it indicates done, in which case
+     * return its result.
+     */
+    function everySelection(editor, fn) {
+        var i, selections = editor.getSelections();
+        for (i = 0; i < selections.length; i++) {
+            var state = fn(selections[i]);
+            if (state && state.done) {
+                return state.result;
+            }
+        }
+    }
+
+    /**
      * Returns true only if all non-blank lines in
      * the selection(s) match the regular expression,
-     * or if the cursor line matches.
+     * or, if no selection, if the cursor line matches.
      */
     function allLinesOn(editor, regExp) {
         if (editor.hasSelection()) {
@@ -105,10 +147,15 @@ define(function (require, exports, module) {
 
     /**
      * For all non-blank lines in the selection(s), or for the
-     * cursor line, insert the provided string if it is not already
-     * present (i.e. the regexp does not match). If found, the replaceRE
-     * is removed. If the afterRE is found, preserve it and insert the
-     * string after it.
+     * cursor line if no selection, insert the provided string if it is
+     * not already present (i.e. the regexp does not match). If found,
+     * the replaceRE is removed. If the afterRE is found, preserve it and
+     * insert the string after it.
+     *
+     * The replaceRE lets us switch between different kinds of headings
+     * or lists by just clicking the desired one rather than having to
+     * turn the old one off first. So it's super important even though
+     * it makes for a bit of a mess.
      */
     function turnLinesOn(editor, regexp, replaceRE, afterRE, insert) {
         if (editor.hasSelection()) {
@@ -154,6 +201,56 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * Determines if the specified range is "on" (i.e. that
+     * it is immediately preceeded by and immediately followed
+     * by the contents of "match").
+     */
+    function isOn(editor, match, start, end) {
+        var matchLength = match.length;
+        var startMatch = '';
+        if (start.ch >= matchLength) {
+            var preStart = {line: start.line,
+                         ch: start.ch - matchLength};
+            startMatch = editor.document.getRange(preStart, start);
+        }
+        var postEnd = {line: end.line, ch: end.ch + matchLength};
+        var endMatch = editor.document.getRange(end, postEnd);
+        return (startMatch === match && endMatch === match);
+    }
+
+    /**
+     * Determines if all selections are on (see isOn above).
+     * If no selection, uses the current cursor position.
+     */
+    function allSelectionsOn(editor, match) {
+        if (editor.hasSelection()) {
+            var result = everySelection(editor, function (selection) {
+                if (!isOn(editor, match, selection.start, selection.end)) {
+                    return {done: true, result: false};
+                }
+            });
+            if (typeof result !== 'undefined') {
+                return result;
+            }
+        } else {
+            var cursor = editor.getCursorPos(false, "to");
+            return isOn(editor, match, cursor, cursor);
+        }
+        return true;
+    }
+
+    /**
+     * Generic function to handle line-based tasks (headings and
+     * lists). For simple cases, this is a toggle. However, if
+     * multiple lines are selected, and the toggle is on for only
+     * some lines, it is turned on for all lines where it is off.
+     *
+     * This seems like the most intuitive behavior as it allows
+     * things like selecting across a bunch of lines, some already
+     * bulleted, and making them all bulleted. Even in that case,
+     * one extra click will then remove all the bullets.
+     */
     function handleLineButton(regexp, replace, after, insert) {
         var editor = EditorManager.getActiveEditor();
         if (!check(editor)) {
@@ -167,6 +264,9 @@ define(function (require, exports, module) {
         }
     }
 
+    // Define the exports; these are the functions that get wired
+    // into toolbar buttons when the toolbar is created.
+
     exports.h1 = function () {
         handleLineButton(MATCH_H1, MATCH_HD, MATCH_BULLET, "# ");
     };
@@ -179,8 +279,28 @@ define(function (require, exports, module) {
         handleLineButton(MATCH_H3, MATCH_HD, MATCH_BULLET, "### ");
     };
 
-    exports.bold = function () {
+    exports.h4 = function () {
+        handleLineButton(MATCH_H4, MATCH_HD, MATCH_BULLET, "#### ");
+    };
 
+    exports.h5 = function () {
+        handleLineButton(MATCH_H5, MATCH_HD, MATCH_BULLET, "##### ");
+    };
+
+    exports.h6 = function () {
+        handleLineButton(MATCH_H6, MATCH_HD, MATCH_BULLET, "###### ");
+    };
+
+    exports.bold = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        if (!allSelectionsOn(editor, "**")) {
+            var cursor = editor.getCursorPos(false, "to");
+            editor.document.replaceRange("****", cursor, null, "+mdbar");
+            editor.setCursorPos({line: cursor.line, ch: cursor.ch + 2});
+        }
     };
 
     exports.bullet = function () {
@@ -189,5 +309,9 @@ define(function (require, exports, module) {
 
     exports.numbered = function () {
         handleLineButton(MATCH_NUMBERED, MATCH_LIST, null, "1. ");
+    };
+
+    exports.quote = function () {
+        handleLineButton(MATCH_QUOTE, MATCH_LIST, null, "> ");
     };
 });

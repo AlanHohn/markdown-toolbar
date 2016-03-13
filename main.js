@@ -31,6 +31,15 @@ define(function (require, exports, module) {
         root.on("click", "#markdown-heading3", function () {
             Handler.h3();
         });
+        root.on("click", "#markdown-heading4", function () {
+            Handler.h4();
+        });
+        root.on("click", "#markdown-heading5", function () {
+            Handler.h5();
+        });
+        root.on("click", "#markdown-heading6", function () {
+            Handler.h6();
+        });
         root.on("click", "#markdown-bold", function () {
             Handler.bold();
         });
@@ -39,6 +48,9 @@ define(function (require, exports, module) {
         });
         root.on("click", "#markdown-numbered", function () {
             Handler.numbered();
+        });
+        root.on("click", "#markdown-quote", function () {
+            Handler.quote();
         });
     }
     
@@ -68,6 +80,7 @@ define(function (require, exports, module) {
     menu.addMenuItem(BAR_COMMAND_ID, "Ctrl-Shift-T");
     
     ExtensionUtils.loadStyleSheet(module, "styles/styles.css");
+    ExtensionUtils.loadStyleSheet(module, "styles/octicons.css");
     
     if (prefs.get("showOnStartup")) {
         toggleBar();
