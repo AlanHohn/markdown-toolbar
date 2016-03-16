@@ -203,7 +203,7 @@ define(function (require, exports, module) {
 
     /**
      * Determines if the specified range is "on" (i.e. that
-     * it is immediately preceeded by and immediately followed
+     * it is immediately preceded by and immediately followed
      * by the contents of "match").
      */
     function isOn(editor, match, start, end) {
@@ -238,6 +238,38 @@ define(function (require, exports, module) {
             return isOn(editor, match, cursor, cursor);
         }
         return true;
+    }
+    
+    function _turnOn(editor, start, end, insert) {
+        // Doing the replace this way gets rid of the current
+        // selection(s), which is undesirable but preferable
+        // to messing the selection up, which is what two separate
+        // inserts does. At least undo works well with this method.
+        var existing = editor.document.getRange(start, end);
+        editor.document.replaceRange(insert + existing + insert, start, end, "+mdbar");
+    }
+    
+    /**
+     * For every selection, or for the cursor line if no selection, 
+     * insert the provided string if it is not already present at 
+     * both the start and end of the selection. 
+     */
+    function turnSelectionsOn(editor, insert) {
+        if (editor.hasSelection()) {
+            var result = everySelection(editor, function (selection) {
+                if (!isOn(editor, insert, selection.start, selection.end)) {
+                    _turnOn(editor, selection.start, selection.end, insert);
+                    selection.end = {line: selection.end.line, ch: selection.end.ch - insert.length};
+                }
+            });
+            if (typeof result !== 'undefined') {
+                return result;
+            }
+        } else {
+            var cursor = editor.getCursorPos(false, "to");
+            _turnOn(editor, cursor, cursor, insert);
+            editor.setCursorPos({line: cursor.line, ch: cursor.ch + insert.length});
+        }
     }
 
     /**
@@ -297,9 +329,7 @@ define(function (require, exports, module) {
             return;
         }
         if (!allSelectionsOn(editor, "**")) {
-            var cursor = editor.getCursorPos(false, "to");
-            editor.document.replaceRange("****", cursor, null, "+mdbar");
-            editor.setCursorPos({line: cursor.line, ch: cursor.ch + 2});
+            turnSelectionsOn(editor, "**");
         }
     };
 
