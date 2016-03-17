@@ -15,6 +15,7 @@ define({
     "BUTTON_BOLD"      : "B",
     "BUTTON_ITALIC"    : "I",
     "BUTTON_STRIKE"    : "S",
+    "BUTTON_CODE"      : "ab",
 
     "HINT_H1"          : "Heading 1",
     "HINT_H2"          : "Heading 2",
@@ -28,5 +29,7 @@ define({
     "HINT_CODE"        : "Inline Code",
     "HINT_BULLET"      : "Bulleted List",
     "HINT_NUMBERED"    : "Numbered List",
-    "HINT_QUOTE"       : "Quoted Text"
+    "HINT_QUOTE"       : "Quoted Text",
+    "HINT_CODEBLOCK"   : "Code Block",
+    "HINT_PARAGRAPH"   : "Reformat Paragraph"
 });

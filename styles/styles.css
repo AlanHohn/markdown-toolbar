@@ -1,6 +1,7 @@
 .alanhohn-markdown-bar .btn
 {
     width: 3em;
+    height: 28px;
     text-align: center;
 }
 
@@ -50,6 +51,11 @@
 .alanhohn-markdown-bar #markdown-strikethrough
 {
     text-decoration: line-through;
+}
+
+.alanhohn-markdown-bar #markdown-code
+{
+    font-family: "Lucida Console", Monaco, monospace
 }
 
 .alanhohn-markdown-bar .spacer
