@@ -43,6 +43,15 @@ define(function (require, exports, module) {
         root.on("click", "#markdown-bold", function () {
             Handler.bold();
         });
+        root.on("click", "#markdown-italic", function () {
+            Handler.italic();
+        });
+        root.on("click", "#markdown-strikethrough", function () {
+            Handler.strikethrough();
+        });
+        root.on("click", "#markdown-code", function () {
+            Handler.code();
+        });
         root.on("click", "#markdown-bullet", function () {
             Handler.bullet();
         });

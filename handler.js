@@ -85,6 +85,23 @@ define(function (require, exports, module) {
         }
     }
 
+    /**
+     * Generic function to handle selection-based tasks (bold,
+     * italic, strikethrough). Behaves similarly to line behavior
+     * above.
+     */
+    function handleSelectionButton(match, badMatch) {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        if (!Selections.allSelectionsOn(editor, match, badMatch)) {
+            Selections.turnSelectionsOn(editor, match, badMatch);
+        } else {
+            Selections.turnSelectionsOff(editor, match, badMatch);
+        }
+    }
+
     // Define the exports; these are the functions that get wired
     // into toolbar buttons when the toolbar is created.
 
@@ -113,13 +130,19 @@ define(function (require, exports, module) {
     };
 
     exports.bold = function () {
-        var editor = EditorManager.getActiveEditor();
-        if (!check(editor)) {
-            return;
-        }
-        if (!Selections.allSelectionsOn(editor, "**")) {
-            Selections.turnSelectionsOn(editor, "**");
-        }
+        handleSelectionButton("**", "");
+    };
+
+    exports.italic = function () {
+        handleSelectionButton("*", "**");
+    };
+
+    exports.strikethrough = function () {
+        handleSelectionButton("~~", "");
+    };
+
+    exports.code = function () {
+        handleSelectionButton("`", "");
     };
 
     exports.bullet = function () {
