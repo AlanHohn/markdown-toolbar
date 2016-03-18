@@ -6,6 +6,9 @@ define(function (require, exports, module) {
 
     var EditorManager   = brackets.getModule("editor/EditorManager");
 
+    var Lines = require("lines"),
+        Selections = require("selections");
+
     /**
      * Regular expressions do most of the heavy lifting, here
      * and everywhere.
@@ -23,7 +26,6 @@ define(function (require, exports, module) {
      * But there isn't a similar limitation on bullets, because
      * it would interfere with bullets at level 3+.
      */
-    var MATCH_NONBLANK = /\S/;
     var MATCH_H1 = /^(\s{0,3}|\s*\*\s*)(#\s)/;
     var MATCH_H2 = /^(\s{0,3}|\s*\*\s*)(##\s)/;
     var MATCH_H3 = /^(\s{0,3}|\s*\*\s*)(###\s)/;
@@ -60,219 +62,6 @@ define(function (require, exports, module) {
     }
 
     /**
-     * Perform the provided action on every non-blank
-     * line in every selection (single or multiple).
-     * If the action returns an object, check if it
-     * indicates done, in which case return its result.
-     *
-     * Note that in CodeMirror a selection that includes
-     * the final newline is indicated by the selection
-     * ending at column 0 of the following line, so we
-     * have to handle that case.
-     */
-    function everySelectionLine(editor, fn) {
-        var i, selections = editor.getSelections();
-        for (i = 0; i < selections.length; i++) {
-            var j, start = selections[i].start.line;
-            var end = (selections[i].end.ch === 0
-                    ? selections[i].end.line : selections[i].end.line + 1);
-            for (j = start; j < end; j++) {
-                var line = editor.document.getLine(j);
-                if (MATCH_NONBLANK.test(line)) {
-                    var state = fn(j, line);
-                    if (state && state.done) {
-                        return state.result;
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Perform the provided action on every selection
-     * (single or multiple). If the action returns an
-     * object, check if it indicates done, in which case
-     * return its result.
-     */
-    function everySelection(editor, fn) {
-        var i, selections = editor.getSelections();
-        for (i = 0; i < selections.length; i++) {
-            var state = fn(selections[i]);
-            if (state && state.done) {
-                return state.result;
-            }
-        }
-    }
-
-    /**
-     * Returns true only if all non-blank lines in
-     * the selection(s) match the regular expression,
-     * or, if no selection, if the cursor line matches.
-     */
-    function allLinesOn(editor, regExp) {
-        if (editor.hasSelection()) {
-            var result = everySelectionLine(editor, function (lineno, line) {
-                if (!regExp.test(line)) {
-                    return {done: true, result: false};
-                }
-            });
-            if (typeof result !== 'undefined') {
-                return result;
-            }
-        } else {
-            var curLine = editor.getCursorPos(false, "to").line;
-            if (!regExp.test(editor.document.getLine(curLine))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    function _turnLineOn(editor, lineno, line, replaceRE, afterRE, insert) {
-        var loc, after = null;
-        var replace = replaceRE.exec(line);
-        if (replace) {
-            after = (afterRE ? afterRE.exec(replace[0]) : null);
-            var s = (after ? after[0] : "");
-            loc = {line: lineno, ch: replace.index};
-            var endloc = {line: lineno, ch: replace.index + replace[0].length};
-            editor.document.replaceRange(s, loc, endloc, "+mdbar");
-            loc.ch += s.length;
-        } else {
-            after = (afterRE ? afterRE.exec(line) : null);
-            loc = {line: lineno, ch: (after ? after.index + after[0].length : 0)};
-        }
-        editor.document.replaceRange(insert, loc, null, "+mdbar");
-    }
-
-    /**
-     * For all non-blank lines in the selection(s), or for the
-     * cursor line if no selection, insert the provided string if it is
-     * not already present (i.e. the regexp does not match). If found,
-     * the replaceRE is removed. If the afterRE is found, preserve it and
-     * insert the string after it.
-     *
-     * The replaceRE lets us switch between different kinds of headings
-     * or lists by just clicking the desired one rather than having to
-     * turn the old one off first. So it's super important even though
-     * it makes for a bit of a mess.
-     */
-    function turnLinesOn(editor, regexp, replaceRE, afterRE, insert) {
-        if (editor.hasSelection()) {
-            everySelectionLine(editor, function (lineno, line) {
-                if (!regexp.test(line)) {
-                    _turnLineOn(editor, lineno, line, replaceRE, afterRE, insert);
-                }
-            });
-        } else {
-            var cursor = editor.getCursorPos(false, "to"),
-                line = editor.document.getLine(cursor.line);
-            _turnLineOn(editor, cursor.line, line, replaceRE, afterRE, insert);
-        }
-    }
-
-    function _turnLineOff(editor, lineno, found, preserveRE) {
-        var preserve = (preserveRE ? preserveRE.exec(found[0]) : null);
-        var replace = (preserve ? preserve[0] : "");
-        var loc = {line: lineno, ch: found.index};
-        var endloc = {line: lineno, ch: found.index + found[0].length};
-        editor.document.replaceRange(replace, loc, endloc, "+mdbar");
-    }
-
-    /**
-     * For all lines in the selection(s), or for the cursor line,
-     * remove the matched regular expression, preserving the
-     * preserveRE if found within the matched regexp.
-     */
-    function turnLinesOff(editor, regexp, preserveRE) {
-        if (editor.hasSelection()) {
-            everySelectionLine(editor, function (lineno, line) {
-                var found = regexp.exec(line);
-                if (found) {
-                    _turnLineOff(editor, lineno, found, preserveRE);
-                }
-            });
-        } else {
-            var cursor = editor.getCursorPos(false, "to");
-            var found = regexp.exec(editor.document.getLine(cursor.line));
-            if (found) {
-                _turnLineOff(editor, cursor.line, found, preserveRE);
-            }
-        }
-    }
-
-    /**
-     * Determines if the specified range is "on" (i.e. that
-     * it is immediately preceded by and immediately followed
-     * by the contents of "match").
-     */
-    function isOn(editor, match, start, end) {
-        var matchLength = match.length;
-        var startMatch = '';
-        if (start.ch >= matchLength) {
-            var preStart = {line: start.line,
-                         ch: start.ch - matchLength};
-            startMatch = editor.document.getRange(preStart, start);
-        }
-        var postEnd = {line: end.line, ch: end.ch + matchLength};
-        var endMatch = editor.document.getRange(end, postEnd);
-        return (startMatch === match && endMatch === match);
-    }
-
-    /**
-     * Determines if all selections are on (see isOn above).
-     * If no selection, uses the current cursor position.
-     */
-    function allSelectionsOn(editor, match) {
-        if (editor.hasSelection()) {
-            var result = everySelection(editor, function (selection) {
-                if (!isOn(editor, match, selection.start, selection.end)) {
-                    return {done: true, result: false};
-                }
-            });
-            if (typeof result !== 'undefined') {
-                return result;
-            }
-        } else {
-            var cursor = editor.getCursorPos(false, "to");
-            return isOn(editor, match, cursor, cursor);
-        }
-        return true;
-    }
-    
-    function _turnOn(editor, start, end, insert) {
-        // Doing the replace this way gets rid of the current
-        // selection(s), which is undesirable but preferable
-        // to messing the selection up, which is what two separate
-        // inserts does. At least undo works well with this method.
-        var existing = editor.document.getRange(start, end);
-        editor.document.replaceRange(insert + existing + insert, start, end, "+mdbar");
-    }
-    
-    /**
-     * For every selection, or for the cursor line if no selection, 
-     * insert the provided string if it is not already present at 
-     * both the start and end of the selection. 
-     */
-    function turnSelectionsOn(editor, insert) {
-        if (editor.hasSelection()) {
-            var result = everySelection(editor, function (selection) {
-                if (!isOn(editor, insert, selection.start, selection.end)) {
-                    _turnOn(editor, selection.start, selection.end, insert);
-                    selection.end = {line: selection.end.line, ch: selection.end.ch - insert.length};
-                }
-            });
-            if (typeof result !== 'undefined') {
-                return result;
-            }
-        } else {
-            var cursor = editor.getCursorPos(false, "to");
-            _turnOn(editor, cursor, cursor, insert);
-            editor.setCursorPos({line: cursor.line, ch: cursor.ch + insert.length});
-        }
-    }
-
-    /**
      * Generic function to handle line-based tasks (headings and
      * lists). For simple cases, this is a toggle. However, if
      * multiple lines are selected, and the toggle is on for only
@@ -289,10 +78,10 @@ define(function (require, exports, module) {
             return;
         }
 
-        if (!allLinesOn(editor, regexp)) {
-            turnLinesOn(editor, regexp, replace, after, insert);
+        if (!Lines.allLinesOn(editor, regexp)) {
+            Lines.turnLinesOn(editor, regexp, replace, after, insert);
         } else {
-            turnLinesOff(editor, regexp, after);
+            Lines.turnLinesOff(editor, regexp, after);
         }
     }
 
@@ -328,8 +117,8 @@ define(function (require, exports, module) {
         if (!check(editor)) {
             return;
         }
-        if (!allSelectionsOn(editor, "**")) {
-            turnSelectionsOn(editor, "**");
+        if (!Selections.allSelectionsOn(editor, "**")) {
+            Selections.turnSelectionsOn(editor, "**");
         }
     };
 
