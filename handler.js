@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     var EditorManager   = brackets.getModule("editor/EditorManager");
 
     var Lines = require("lines"),
+        Paragraphs = require("paragraphs"),
         Selections = require("selections");
 
     /**
@@ -155,5 +156,13 @@ define(function (require, exports, module) {
 
     exports.quote = function () {
         handleLineButton(MATCH_QUOTE, MATCH_LIST, null, "> ");
+    };
+
+    exports.reflow = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        Paragraphs.reflow(editor);
     };
 });

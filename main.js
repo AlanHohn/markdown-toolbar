@@ -10,7 +10,6 @@ define(function (require, exports, module) {
         ModalBar           = brackets.getModule("widgets/ModalBar").ModalBar,
         PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 
-
     var Handler = require("handler"),
         Strings = require("strings"),
         _markdownBarTemplate = require("text!templates/markdown-bar.html");
@@ -61,6 +60,9 @@ define(function (require, exports, module) {
         root.on("click", "#markdown-quote", function () {
             Handler.quote();
         });
+        root.on("click", "#markdown-reflow", function () {
+            Handler.reflow();
+        });
     }
     
     function toggleBar() {
@@ -80,6 +82,10 @@ define(function (require, exports, module) {
 
     prefs.definePreference("showOnStartup", "boolean", false, {
         description: Strings.DESCRIPTION_SHOW_ON_STARTUP
+    });
+
+    prefs.definePreference("maxLength", "number", 80, {
+        description: Strings.DESCRIPTION_MAX_LINE_LENGTH
     });
 
     var BAR_COMMAND_ID = "alanhohn.togglemarkdownbar";

@@ -3,6 +3,7 @@
 
 define({
     "DESCRIPTION_SHOW_ON_STARTUP" : "Show Markdown bar on startup",
+    "DESCRIPTION_MAX_LINE_LENGTH" : "Maximum line length for reflow",
 
     "MENU_TOOLBAR"     : "Markdown Toolbar",
 
@@ -31,5 +32,6 @@ define({
     "HINT_NUMBERED"    : "Numbered List",
     "HINT_QUOTE"       : "Quoted Text",
     "HINT_CODEBLOCK"   : "Code Block",
-    "HINT_PARAGRAPH"   : "Reformat Paragraph"
+    "HINT_PARAGRAPH"   : "Separate Paragraphs",
+    "HINT_REFLOW"      : "Reflow Paragraphs"
 });

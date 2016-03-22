@@ -1,6 +1,6 @@
 .alanhohn-markdown-bar .btn
 {
-    width: 3em;
+    width: 45px;
     height: 28px;
     text-align: center;
 }
@@ -56,6 +56,13 @@
 .alanhohn-markdown-bar #markdown-code
 {
     font-family: "Lucida Console", Monaco, monospace
+}
+
+.alanhohn-markdown-bar #markdown-reflow
+{
+    padding-top: 0px;
+    font-size: x-large;
+    font-weight: bolder;
 }
 
 .alanhohn-markdown-bar .spacer
