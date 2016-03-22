@@ -157,7 +157,18 @@ define(function (require, exports, module) {
     exports.quote = function () {
         handleLineButton(MATCH_QUOTE, MATCH_LIST, null, "> ");
     };
+    
+    exports.codeblock = function () {
+    };
 
+    exports.paragraph = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        Paragraphs.paragraph(editor);
+    };
+    
     exports.reflow = function () {
         var editor = EditorManager.getActiveEditor();
         if (!check(editor)) {

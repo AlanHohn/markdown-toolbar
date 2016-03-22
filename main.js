@@ -6,11 +6,13 @@ define(function (require, exports, module) {
 
     var CommandManager     = brackets.getModule("command/CommandManager"),
         ExtensionUtils     = brackets.getModule("utils/ExtensionUtils"),
+        KeyBindingManager  = brackets.getModule("command/KeyBindingManager"),
         Menus              = brackets.getModule("command/Menus"),
         ModalBar           = brackets.getModule("widgets/ModalBar").ModalBar,
         PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 
     var Handler = require("handler"),
+        KeyboardPrefs = JSON.parse(require("text!keyboard.json")),
         Strings = require("strings"),
         _markdownBarTemplate = require("text!templates/markdown-bar.html");
     
@@ -60,6 +62,12 @@ define(function (require, exports, module) {
         root.on("click", "#markdown-quote", function () {
             Handler.quote();
         });
+        root.on("click", "#markdown-codeblock", function () {
+            Handler.codeblock();
+        });
+        root.on("click", "#markdown-paragraph", function () {
+            Handler.paragraph();
+        });
         root.on("click", "#markdown-reflow", function () {
             Handler.reflow();
         });
@@ -88,12 +96,62 @@ define(function (require, exports, module) {
         description: Strings.DESCRIPTION_MAX_LINE_LENGTH
     });
 
-    var BAR_COMMAND_ID = "alanhohn.togglemarkdownbar";
+    var BAR_COMMAND_ID = "alanhohn.togglemarkdownbar",
+        H1_COMMAND_ID = "alanhohn.markdownheading1",
+        H2_COMMAND_ID = "alanhohn.markdownheading2",
+        H3_COMMAND_ID = "alanhohn.markdownheading3",
+        H4_COMMAND_ID = "alanhohn.markdownheading4",
+        H5_COMMAND_ID = "alanhohn.markdownheading5",
+        H6_COMMAND_ID = "alanhohn.markdownheading6",
+        BOLD_COMMAND_ID = "alanhohn.markdownbold",
+        ITALIC_COMMAND_ID = "alanhohn.markdownitalic",
+        STRIKE_COMMAND_ID = "alanhohn.markdownstrike",
+        CODE_COMMAND_ID = "alanhohn.markdowncode",
+        BULLET_COMMAND_ID = "alanhohn.markdownbullet",
+        NUMBERED_COMMAND_ID = "alanhohn.markdownnumbered",
+        QUOTE_COMMAND_ID = "alanhohn.markdownquote",
+        CODEBLOCK_COMMAND_ID = "alanhohn.markdowncodeblock",
+        PARAGRAPH_COMMAND_ID = "alanhohn.markdownparagraph",
+        REFLOW_COMMAND_ID = "alanhohn.markdownreflow";
+    
     cmdToolbar = CommandManager.register(Strings.MENU_TOOLBAR, BAR_COMMAND_ID, toggleBar);
-
     var menu = Menus.getMenu(Menus.AppMenuBar.VIEW_MENU);
     menu.addMenuItem(BAR_COMMAND_ID, "Ctrl-Shift-T");
-    
+
+    CommandManager.register(Strings.HINT_H1, H1_COMMAND_ID, Handler.h1);
+    CommandManager.register(Strings.HINT_H2, H2_COMMAND_ID, Handler.h2);
+    CommandManager.register(Strings.HINT_H3, H3_COMMAND_ID, Handler.h3);
+    CommandManager.register(Strings.HINT_H4, H4_COMMAND_ID, Handler.h4);
+    CommandManager.register(Strings.HINT_H5, H5_COMMAND_ID, Handler.h5);
+    CommandManager.register(Strings.HINT_H6, H6_COMMAND_ID, Handler.h6);
+    CommandManager.register(Strings.HINT_BOLD, BOLD_COMMAND_ID, Handler.bold);
+    CommandManager.register(Strings.HINT_ITALIC, ITALIC_COMMAND_ID, Handler.italic);
+    CommandManager.register(Strings.HINT_STRIKE, STRIKE_COMMAND_ID, Handler.strikethrough);
+    CommandManager.register(Strings.HINT_CODE, CODE_COMMAND_ID, Handler.code);
+    CommandManager.register(Strings.HINT_BULLET, BULLET_COMMAND_ID, Handler.bullet);
+    CommandManager.register(Strings.HINT_NUMBERED, NUMBERED_COMMAND_ID, Handler.numbered);
+    CommandManager.register(Strings.HINT_QUOTE, QUOTE_COMMAND_ID, Handler.quote);
+    CommandManager.register(Strings.HINT_CODEBLOCK, CODEBLOCK_COMMAND_ID, Handler.codeblock);
+    CommandManager.register(Strings.HINT_PARAGRAPH, PARAGRAPH_COMMAND_ID, Handler.paragraph);
+    CommandManager.register(Strings.HINT_REFLOW, REFLOW_COMMAND_ID, Handler.reflow);
+
+    KeyBindingManager.addBinding(H1_COMMAND_ID, KeyboardPrefs.heading1);
+    KeyBindingManager.addBinding(H2_COMMAND_ID, KeyboardPrefs.heading2);
+    KeyBindingManager.addBinding(H3_COMMAND_ID, KeyboardPrefs.heading3);
+    KeyBindingManager.addBinding(H4_COMMAND_ID, KeyboardPrefs.heading4);
+    KeyBindingManager.addBinding(H5_COMMAND_ID, KeyboardPrefs.heading5);
+    KeyBindingManager.addBinding(H6_COMMAND_ID, KeyboardPrefs.heading6);
+    KeyBindingManager.addBinding(BOLD_COMMAND_ID, KeyboardPrefs.bold);
+    KeyBindingManager.addBinding(ITALIC_COMMAND_ID, KeyboardPrefs.italic);
+    KeyBindingManager.addBinding(STRIKE_COMMAND_ID, KeyboardPrefs.strikethrough);
+    KeyBindingManager.addBinding(CODE_COMMAND_ID, KeyboardPrefs.code);
+    KeyBindingManager.addBinding(BULLET_COMMAND_ID, KeyboardPrefs.bullet);
+    KeyBindingManager.addBinding(NUMBERED_COMMAND_ID, KeyboardPrefs.numbered);
+    KeyBindingManager.addBinding(QUOTE_COMMAND_ID, KeyboardPrefs.quote);
+    KeyBindingManager.addBinding(CODEBLOCK_COMMAND_ID, KeyboardPrefs.codeblock);
+    KeyBindingManager.addBinding(PARAGRAPH_COMMAND_ID, KeyboardPrefs.paragraph);
+    KeyBindingManager.addBinding(REFLOW_COMMAND_ID, KeyboardPrefs.reflow);
+
     ExtensionUtils.loadStyleSheet(module, "styles/styles.css");
     ExtensionUtils.loadStyleSheet(module, "styles/octicons.css");
     

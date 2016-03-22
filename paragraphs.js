@@ -9,9 +9,20 @@ define(function (require, exports, module) {
     var prefs = PreferencesManager.getExtensionPrefs("markdownbar");
 
     var BLANK_LINE = /^\s*$/;
-    var NEW_PARA = /^\s*(\*\s+|\d\.\s+|>\s+)?$/;
+    var NEW_PARA = /^\s*$|\*\s|\d\.\s|>\s/;
     var LAST_WHITESPACE = /\s\S*$/;
 
+    function _makeLineParagraph(editor, lineNum) {
+        var thisLine = editor.document.getLine(lineNum);
+        if (!BLANK_LINE.test(thisLine)) {
+            var nextLine = editor.document.getLine(lineNum + 1);
+            if (!NEW_PARA.test(nextLine)) {
+                var loc = {line: lineNum + 1, ch: 0};
+                editor.document.replaceRange('\n', loc, loc, "+mdpara");
+            }
+        }
+    }
+    
     function _findParagraphStart(editor, fromLine) {
         var curLine = fromLine;
         while (curLine > 0) {
@@ -47,9 +58,11 @@ define(function (require, exports, module) {
             }
         }
         output += input + "\n";
-        var start = {line: startLine, ch: 0};
-        var end = {line: curLine, ch: 0};
-        editor.document.replaceRange(output, start, end, "+mdpara");
+        if (startLine !== curLine) {
+            var start = {line: startLine, ch: 0};
+            var end = {line: curLine, ch: 0};
+            editor.document.replaceRange(output, start, end, "+mdflow");
+        }
     }
 
     function _reflowSelections(editor, maxLength) {
@@ -57,7 +70,10 @@ define(function (require, exports, module) {
         var i, j, firstLine = Number.MAX_VALUE;
         for (i = selections.length - 1; i >= 0; i--) {
             var startLine = selections[i].start.line;
-            var endLine = (selections[i].end.ch === 0) ? selections[i].end.line - 1 : selections[i].end.line;
+            var endLine = selections[i].end.line;
+            if (selections[i].end.ch === 0) {
+                endLine--;
+            }
             for (j = endLine; j >= startLine; j--) {
                 if (j < firstLine) {
                     var paraStart = _findParagraphStart(editor, j);
@@ -68,6 +84,26 @@ define(function (require, exports, module) {
         }
     }
 
+    exports.paragraph = function (editor) {
+        if (editor.hasSelection()) {
+            var selections = editor.getSelections();
+            var i, j;
+            for (i = selections.length - 1; i >= 0; i--) {
+                var startLine = selections[i].start.line;
+                var endLine = selections[i].end.line;
+                if (selections[i].end.ch === 0) {
+                    endLine--;
+                }
+                for (j = endLine; j >= startLine; j--) {
+                    _makeLineParagraph(editor, j);
+                }
+            }
+        } else {
+            var cursor = editor.getCursorPos(false, "to");
+            _makeLineParagraph(editor, cursor.line);
+        }
+    };
+    
     exports.reflow = function (editor) {
         var maxLength = prefs.get("maxLength");
         if (editor.hasSelection()) {
