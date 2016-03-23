@@ -9,7 +9,7 @@ define(function (require, exports, module) {
     var prefs = PreferencesManager.getExtensionPrefs("markdownbar");
 
     var BLANK_LINE = /^\s*$/;
-    var NEW_PARA = /^\s*$|\*\s|\d\.\s|>\s/;
+    var NEW_PARA = /^(\s*$|\*\s|\d\.\s|>\s|\|)/;
     var LAST_WHITESPACE = /\s\S*$/;
 
     function _makeLineParagraph(editor, lineNum) {
