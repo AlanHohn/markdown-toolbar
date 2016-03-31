@@ -1,12 +1,20 @@
 {
     "name": "alanhohn.markdown-toolbar",
     "title": "Markdown Toolbar",
-    "description": "Provides a toolbar to help write documents in Markdown.",
-    "homepage": "https://github.com/alanhohn/markdown-toolbar",
     "version": "1.0.0",
-    "author": "Alan Hohn <alanhohn@gmail.com> (http://github.com/alanhohn)",
+    "engines": { "brackets": ">=1.0.0" },
+    "description": "Toolbar for writing documents in Markdown.",
+    "keywords": ["brackets-extension", "markdown", "writing"],
+    "homepage": "https://github.com/alanhohn/markdown-toolbar",
+    "bugs": "https://github.com/alanhohn/markdown-toolbar/issues",
     "license": "MIT",
-    "engines": {
-        "brackets": ">=0.24.0"
+    "author": {
+        "name": "Alan Hohn",
+        "email": "alanhohn@gmail.com",
+        "url": "https://github.com/alanhohn"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/alanhohn/markdown-toolbar.git"
     }
 }
