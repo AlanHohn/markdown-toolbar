@@ -4,18 +4,24 @@ Brackets extension that adds Markdown editing support via a toolbar.
 
 ## Status
 
-This repository is in a pre-publication state; it is only minimally usable. The
-toolbar displays and line-based items work (headings and lists).
+The toolbar is now generally functional, so I'm calling this the 1.0.0 release.
+Line based items work (headings, lists, and quotes). Selection based items
+(bold, italic, monospace) are somewhat reasonable, though they could be
+smarter. Paragraph reflow seems to be pretty solid. Still to be implemented are
+block-based items (code blocks, tables).
 
 ## Preferences
 
-At the moment, there is a single preference. To make the toolbar display by default
-when Brackets starts, set:
+* `markdownbar.showOnStartup`: Display the toolbar when Brackets starts, default false
+* `markdownbar.maxLength`: Maximum line length used for reflow, default 80
+
+Example:
 
 ```json
 {
     ...
-    "markdownbar.showOnStartup": true
+    "markdownbar.showOnStartup": true,
+    "markdownbar.maxLength": 75
 }
 ```
 
