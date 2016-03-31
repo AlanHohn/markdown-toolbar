@@ -8,5 +8,5 @@
     "license": "MIT",
     "engines": {
         "brackets": ">=0.24.0"
-    },
+    }
 }
