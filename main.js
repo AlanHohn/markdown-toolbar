@@ -5,6 +5,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var CommandManager     = brackets.getModule("command/CommandManager"),
+        EditorManager      = brackets.getModule("editor/EditorManager"),
         ExtensionUtils     = brackets.getModule("utils/ExtensionUtils"),
         KeyBindingManager  = brackets.getModule("command/KeyBindingManager"),
         Menus              = brackets.getModule("command/Menus"),
@@ -19,6 +20,7 @@ define(function (require, exports, module) {
     var prefs = PreferencesManager.getExtensionPrefs("markdownbar");
 
     var toolBar = null,
+        barShouldShow = false,
         cmdToolbar = null;
 
     function registerCallbacks(toolBar) {
@@ -73,18 +75,48 @@ define(function (require, exports, module) {
         });
     }
     
-    function toggleBar() {
-        if (toolBar) {
-            toolBar.close();
-            toolBar = null;
-            cmdToolbar.setChecked(false);
-        } else {
+    function showBar() {
+        if (!toolBar) {
             var templateVars = {
                 Strings: Strings
             };
             toolBar = new ModalBar(Mustache.render(_markdownBarTemplate, templateVars), false);
             registerCallbacks(toolBar);
             cmdToolbar.setChecked(true);
+        }
+    }
+
+    function closeBar() {
+        if (toolBar) {
+            toolBar.close();
+            toolBar = null;
+            cmdToolbar.setChecked(false);
+        }
+    }
+
+    function toggleBar() {
+        if (toolBar) {
+            barShouldShow = false;
+            closeBar();
+        } else {
+            barShouldShow = true;
+            showBar();
+        }
+    }
+
+    function activeEditorChangeHandler(event, activeEditor, previousEditor) {
+        var mode = null;
+        if (activeEditor && activeEditor.document) {
+            mode = activeEditor._getModeFromDocument();
+        }
+        if (mode === "gfm" || mode === "markdown") {
+            cmdToolbar.setEnabled(true);
+            if (barShouldShow) {
+                showBar();
+            }
+        } else {
+            cmdToolbar.setEnabled(false);
+            closeBar();
         }
     }
 
@@ -156,7 +188,10 @@ define(function (require, exports, module) {
     ExtensionUtils.loadStyleSheet(module, "styles/octicons.css");
     
     if (prefs.get("showOnStartup")) {
-        toggleBar();
+        barShouldShow = true;
     }
+
+    activeEditorChangeHandler(null, EditorManager.getActiveEditor(), null);
+    EditorManager.on("activeEditorChange", activeEditorChangeHandler);
 
 });
