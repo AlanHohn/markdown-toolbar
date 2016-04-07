@@ -159,6 +159,11 @@ define(function (require, exports, module) {
     };
     
     exports.codeblock = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        Paragraphs.codeblock(editor);
     };
 
     exports.paragraph = function () {

@@ -84,6 +84,11 @@ define(function (require, exports, module) {
         }
     }
 
+    function _insertLine(editor, lineno, line) {
+        var pos = {line: lineno, ch: 0};
+        editor.document.replaceRange(line, pos, pos, "+mdbar");
+    }
+
     exports.paragraph = function (editor) {
         if (editor.hasSelection()) {
             var selections = editor.getSelections();
@@ -112,6 +117,25 @@ define(function (require, exports, module) {
             var cursor = editor.getCursorPos(false, "to");
             var startLine = _findParagraphStart(editor, cursor.line);
             _reflowParagraph(editor, startLine, maxLength);
+        }
+    };
+
+    exports.codeblock = function (editor) {
+        if (editor.hasSelection()) {
+            var i, selections = editor.getSelections();
+            for (i = selections.length - 1; i >= 0; i--) {
+                var startLine = selections[i].start.line;
+                var endLine = selections[i].end.line + 1;
+                if (selections[i].end.ch === 0) {
+                    endLine--;
+                }
+                _insertLine(editor, endLine, '```\n\n');
+                _insertLine(editor, startLine, '\n```\n');
+            }
+        } else {
+            var cursor = editor.getCursorPos(false, "to");
+            _insertLine(editor, cursor.line, '\n```\n\n```\n\n');
+            editor.setCursorPos({line: cursor.line + 2, ch: 0});
         }
     };
 
