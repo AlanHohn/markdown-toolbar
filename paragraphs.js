@@ -10,7 +10,16 @@ define(function (require, exports, module) {
 
     var BLANK_LINE = /^\s*$/;
     var NEW_PARA = /^(\s*$|\*\s|\d\.\s|>\s|\|)/;
+    var START_MATTER = /^\s*(\*\s+|\d\.\s+|>\s+|\|\s+)/;
     var LAST_WHITESPACE = /\s\S*$/;
+
+    function _repeat(str, n) {
+        var i, output = '';
+        for (i = 0; i < n; i++) {
+            output += str;
+        }
+        return output;
+    }
 
     function _makeLineParagraph(editor, lineNum) {
         var thisLine = editor.document.getLine(lineNum);
@@ -26,8 +35,11 @@ define(function (require, exports, module) {
     function _findParagraphStart(editor, fromLine) {
         var curLine = fromLine;
         while (curLine > 0) {
-            if (BLANK_LINE.test(editor.document.getLine(curLine))) {
+            var line = editor.document.getLine(curLine);
+            if (BLANK_LINE.test(line)) {
                 return curLine + 1;
+            } else if (NEW_PARA.test(line)) {
+                return curLine;
             }
             curLine--;
         }
@@ -37,32 +49,40 @@ define(function (require, exports, module) {
     function _reflowParagraph(editor, startLine, maxLength) {
         var curLine = startLine;
         var line = editor.document.getLine(curLine);
+        if (!line) {
+            return;
+        }
         var input = line;
         var output = "";
-        while (line && !NEW_PARA.test(line)) {
+        var startMatter = "";
+        var startSearch = START_MATTER.exec(line);
+        if (startSearch) {
+            startMatter = _repeat(" ", startSearch[0].length);
+        }
+        while (true) {
             while (input.length > maxLength) {
                 var search = input.substring(0, maxLength - 1);
                 var result = LAST_WHITESPACE.exec(search);
                 if (result) {
-                    output += input.substring(0, result.index) + "\n";
+                    output += input.substring(0, result.index) + "\n" + startMatter;
                     input = input.substring(result.index + 1);
                 } else {
                     // Line with no whitespace, bail
                     break;
                 }
             }
-            curLine++;
-            line = editor.document.getLine(curLine);
+            line = editor.document.getLine(curLine + 1);
             if (line && !NEW_PARA.test(line)) {
+                curLine++;
                 input = input.trim() + " " + line.trim();
+            } else {
+                break;
             }
         }
         output += input + "\n";
-        if (startLine !== curLine) {
-            var start = {line: startLine, ch: 0};
-            var end = {line: curLine, ch: 0};
-            editor.document.replaceRange(output, start, end, "+mdflow");
-        }
+        var start = {line: startLine, ch: 0};
+        var end = {line: curLine + 1, ch: 0};
+        editor.document.replaceRange(output, start, end, "+mdflow");
     }
 
     function _reflowSelections(editor, maxLength) {
