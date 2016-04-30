@@ -2,13 +2,34 @@
 
 Brackets extension that adds Markdown editing support via a toolbar.
 
-## Status
+## Features
 
-The toolbar is now generally functional, so I'm calling this the 1.0.0 release.
-Line based items work (headings, lists, and quotes). Selection based items
-(bold, italic, monospace) are somewhat reasonable, though they could be
-smarter. Paragraph reflow seems to be pretty solid. Still to be implemented are
-block-based items (code blocks, tables).
+### Formatting
+
+* Heading (H1 - H6) toggles
+* Numbered and unnumbered lists
+* Bold, italic, monospace, strikethrough. Work as toggles, though
+  they are a little picky about the selection in order to toggle off.
+* Code blocks
+* Buttons do sensible things with no selection, single selection,
+  or multiple selections.
+
+### Converting to Markdown
+
+* Separate paragraphs: Adds a blank line between paragraphs. This is
+  very handy for reformatting text pasted from a non-Markdown source
+  such as a word processor. By its nature it can only be applied once,
+  so it's important to control the selection.
+* Reflow: Reformats a paragraph to add hard line breaks to keep lines
+  under a maximum length. Handles lists well, so it's pretty safe to
+  apply it to a whole document. It is safe to apply multiple times or
+  to repapply to a paragraph that is already partially correct. It does not
+  handle tables well, so keep it away from those.
+
+## Planned Features
+
+* Add a button and a GUI to insert a Markdown table
+* Make reflow smart about tables
 
 ## Preferences
 
