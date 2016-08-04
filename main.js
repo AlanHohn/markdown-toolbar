@@ -171,8 +171,8 @@ define(function (require, exports, module) {
     KeyBindingManager.addBinding(H2_COMMAND_ID, KeyboardPrefs.heading2);
     KeyBindingManager.addBinding(H3_COMMAND_ID, KeyboardPrefs.heading3);
     KeyBindingManager.addBinding(H4_COMMAND_ID, KeyboardPrefs.heading4);
-    KeyBindingManager.addBinding(H5_COMMAND_ID, KeyboardPrefs.heading5);
-    KeyBindingManager.addBinding(H6_COMMAND_ID, KeyboardPrefs.heading6);
+    KeyBindingManager.addBinding(H5_COMMAND_ID);
+    KeyBindingManager.addBinding(H6_COMMAND_ID);
     KeyBindingManager.addBinding(BOLD_COMMAND_ID, KeyboardPrefs.bold);
     KeyBindingManager.addBinding(ITALIC_COMMAND_ID, KeyboardPrefs.italic);
     KeyBindingManager.addBinding(STRIKE_COMMAND_ID, KeyboardPrefs.strikethrough);
