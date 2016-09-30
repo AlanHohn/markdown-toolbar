@@ -10,6 +10,7 @@ Brackets extension that adds Markdown editing support via a toolbar.
 * Numbered and unnumbered lists
 * Bold, italic, monospace, strikethrough. Work as toggles, though
   they are a little picky about the selection in order to toggle off.
+* Images and links
 * Code blocks
 * Buttons do sensible things with no selection, single selection,
   or multiple selections.
