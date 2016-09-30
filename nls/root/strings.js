@@ -2,6 +2,9 @@
 /*global define */
 
 define({
+    "CANCEL" : "Cancel",
+    "OK"     : "OK",
+    
     "DESCRIPTION_SHOW_ON_STARTUP" : "Show Markdown bar on startup",
     "DESCRIPTION_MAX_LINE_LENGTH" : "Maximum line length for reflow",
 
@@ -32,6 +35,22 @@ define({
     "HINT_NUMBERED"    : "Numbered List",
     "HINT_QUOTE"       : "Quoted Text",
     "HINT_CODEBLOCK"   : "Code Block",
+    "HINT_IMAGE"       : "Image",
+    "HINT_LINK"        : "Link",
     "HINT_PARAGRAPH"   : "Separate Paragraphs",
-    "HINT_REFLOW"      : "Reflow Paragraphs"
+    "HINT_REFLOW"      : "Reflow Paragraphs",
+    
+    "IMAGE_DIALOG"           : "Insert Image",
+    "IMAGE_TEXT_TITLE"       : "Alternate Text",
+    "IMAGE_TEXT_PLACEHOLDER" : "displayed on hover...",
+    "IMAGE_PATH_TITLE"       : "Image Path",
+    "IMAGE_PATH_PLACEHOLDER" : "e.g. http://server/image.png",
+    
+    "LINK_DIALOG"           : "Insert Link",
+    "LINK_TEXT_TITLE"       : "Link Text",
+    "LINK_TEXT_PLACEHOLDER" : "...",
+    "LINK_PATH_TITLE"       : "URL",
+    "LINK_PATH_PLACEHOLDER" : "relative or absolute...",
+
+    "SELECT_FILE" : "Select File"
 });

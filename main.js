@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, brackets, Mustache */
+/*global define, brackets */
 
 define(function (require, exports, module) {
     "use strict";
@@ -10,6 +10,7 @@ define(function (require, exports, module) {
         KeyBindingManager  = brackets.getModule("command/KeyBindingManager"),
         Menus              = brackets.getModule("command/Menus"),
         ModalBar           = brackets.getModule("widgets/ModalBar").ModalBar,
+        Mustache           = brackets.getModule("thirdparty/mustache/mustache"),
         PreferencesManager = brackets.getModule("preferences/PreferencesManager");
 
     var Handler = require("handler"),
@@ -66,6 +67,12 @@ define(function (require, exports, module) {
         });
         root.on("click", "#markdown-codeblock", function () {
             Handler.codeblock();
+        });
+        root.on("click", "#markdown-image", function () {
+            Handler.image();
+        });
+        root.on("click", "#markdown-link", function () {
+            Handler.link();
         });
         root.on("click", "#markdown-paragraph", function () {
             Handler.paragraph();
@@ -133,8 +140,6 @@ define(function (require, exports, module) {
         H2_COMMAND_ID = "alanhohn.markdownheading2",
         H3_COMMAND_ID = "alanhohn.markdownheading3",
         H4_COMMAND_ID = "alanhohn.markdownheading4",
-        H5_COMMAND_ID = "alanhohn.markdownheading5",
-        H6_COMMAND_ID = "alanhohn.markdownheading6",
         BOLD_COMMAND_ID = "alanhohn.markdownbold",
         ITALIC_COMMAND_ID = "alanhohn.markdownitalic",
         STRIKE_COMMAND_ID = "alanhohn.markdownstrike",
@@ -154,8 +159,6 @@ define(function (require, exports, module) {
     CommandManager.register(Strings.HINT_H2, H2_COMMAND_ID, Handler.h2);
     CommandManager.register(Strings.HINT_H3, H3_COMMAND_ID, Handler.h3);
     CommandManager.register(Strings.HINT_H4, H4_COMMAND_ID, Handler.h4);
-    CommandManager.register(Strings.HINT_H5, H5_COMMAND_ID, Handler.h5);
-    CommandManager.register(Strings.HINT_H6, H6_COMMAND_ID, Handler.h6);
     CommandManager.register(Strings.HINT_BOLD, BOLD_COMMAND_ID, Handler.bold);
     CommandManager.register(Strings.HINT_ITALIC, ITALIC_COMMAND_ID, Handler.italic);
     CommandManager.register(Strings.HINT_STRIKE, STRIKE_COMMAND_ID, Handler.strikethrough);
@@ -171,8 +174,6 @@ define(function (require, exports, module) {
     KeyBindingManager.addBinding(H2_COMMAND_ID, KeyboardPrefs.heading2);
     KeyBindingManager.addBinding(H3_COMMAND_ID, KeyboardPrefs.heading3);
     KeyBindingManager.addBinding(H4_COMMAND_ID, KeyboardPrefs.heading4);
-    KeyBindingManager.addBinding(H5_COMMAND_ID);
-    KeyBindingManager.addBinding(H6_COMMAND_ID);
     KeyBindingManager.addBinding(BOLD_COMMAND_ID, KeyboardPrefs.bold);
     KeyBindingManager.addBinding(ITALIC_COMMAND_ID, KeyboardPrefs.italic);
     KeyBindingManager.addBinding(STRIKE_COMMAND_ID, KeyboardPrefs.strikethrough);

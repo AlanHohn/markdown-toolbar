@@ -8,7 +8,8 @@ define(function (require, exports, module) {
 
     var Lines = require("lines"),
         Paragraphs = require("paragraphs"),
-        Selections = require("selections");
+        Selections = require("selections"),
+        Dialogs = require("dialogs");
 
     /**
      * Regular expressions do most of the heavy lifting, here
@@ -144,6 +145,22 @@ define(function (require, exports, module) {
 
     exports.code = function () {
         handleSelectionButton("`", "");
+    };
+  
+    exports.image = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        Dialogs.image(editor);
+    };
+    
+    exports.link = function () {
+        var editor = EditorManager.getActiveEditor();
+        if (!check(editor)) {
+            return;
+        }
+        Dialogs.link(editor);
     };
 
     exports.bullet = function () {
