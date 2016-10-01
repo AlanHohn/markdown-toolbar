@@ -49,6 +49,6 @@ Example:
 
 ## Attribution
 
-Icons from [Octicons][https://octicons.github.com/].
+Icons from [Octicons](https://octicons.github.com/).
 
 
