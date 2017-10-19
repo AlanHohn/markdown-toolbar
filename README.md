@@ -24,7 +24,7 @@ Brackets extension that adds Markdown editing support via a toolbar.
 * Reflow: Reformats a paragraph to add hard line breaks to keep lines
   under a maximum length. Handles lists well, so it's pretty safe to
   apply it to a whole document. It is safe to apply multiple times or
-  to repapply to a paragraph that is already partially correct. It does not
+  to reapply to a paragraph that is already partially correct. It does not
   handle tables well, so keep it away from those.
 
 ## Planned Features
